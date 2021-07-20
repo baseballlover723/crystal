@@ -103,7 +103,7 @@ module Crystal
       String.build do |flags|
         link_annotations.reverse_each do |ann|
           if ldflags = ann.ldflags
-            flags << ' ' << ldflags
+            flags << ' ' << Process.quote_windows(ldflags)
           end
 
           if libname = ann.lib
@@ -128,15 +128,15 @@ module Crystal
 
       link_annotations.reverse_each do |ann|
         if ldflags = ann.ldflags
-          flags << ldflags
+          flags << Process.quote_posix(ldflags)
         end
 
         # First, check pkg-config for the pkg-config module name if provided, then
         # check pkg-config with the lib name, then fall back to -lname
         if (pkg_config_name = ann.pkg_config) && (flag = pkg_config(pkg_config_name, static_build))
-          flags << flag
+          flags << Process.quote_posix(flag)
         elsif (lib_name = ann.lib) && (flag = pkg_config(lib_name, static_build))
-          flags << flag
+          flags << Process.quote_posix(flag)
         elsif (lib_name = ann.lib)
           flags << Process.quote_posix("-l#{lib_name}")
         end
